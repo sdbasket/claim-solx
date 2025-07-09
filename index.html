@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +38,7 @@
   <button onclick="claimTokens()">CLAIM SOLX</button>
 
   <script>
-    const contractAddress = "0xe0B7Ad7F8F26e2b00C8b47b5Df370f15F90fCF48"; // Ethereum
+    const contractAddress = "0xc14d28900b089E731C23E15a37a8bC989b3C0F60"; // Solaxy contract
     const contractABI = [{"inputs":[],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
     let web3;
@@ -69,7 +70,7 @@
         alert("✅ Claimed SOLX successfully!");
       } catch (err) {
         console.error(err);
-        alert("❌ Claim failed. Check console for details.");
+        alert("❌ Claim failed: " + (err.message || err));
       }
     }
 
