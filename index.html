@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Claim SOLX</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+</head>
+<body style="font-family:sans-serif; text-align:center; padding-top:50px; background:#111; color:#fff;">
+  <h1>Claim SOLX Tokens</h1>
+  <p>Connected wallet: <span id="wallet" style="font-weight:bold;">Not connected</span></p>
+  <button onclick="claim()" style="font-size:20px;padding:15px 30px;background:#00cc99;color:#fff;border:none;border-radius:8px;cursor:pointer;">CLAIM SOLX</button>
+  <p id="status" style="margin-top:30px;"></p>
+
+  <script>
+    const CONTRACT_ADDRESS = "0xc14d28900b089E731C23E15a37a8bC989b3C0F60";
+    const ABI = [{
+      "inputs": [],
+      "name": "Outpouring",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }];
+
+    let web3, contract, accounts;
+
+    async function connect() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        document.getElementById("wallet").innerText = accounts[0];
+        contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+      } else {
+        alert("MetaMask not detected.");
+      }
+    }
+
+    async function claim() {
+      if (!contract || !accounts) {
+        await connect();
+      }
+      document.getElementById("status").innerText = "Claiming... please confirm in MetaMask.";
+      try {
+        await contract.methods.Outpouring().send({ from: accounts[0] });
+        document.getElementById("status").innerText = "✅ Claim successful! Check your wallet.";
+      } catch (e) {
+        document.getElementById("status").innerText = "❌ Transaction failed: " + e.message;
+      }
+    }
+
+    // Connect immediately if MetaMask is available
+    window.addEventListener('load', connect);
+  </script>
+</body>
+</html>
